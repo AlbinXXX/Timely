@@ -1,0 +1,5 @@
+# Time Tracker - MCP Integration
+
+node_modules/
+*.log
+.DS_Store

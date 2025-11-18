@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "time-tracker-mcp": {
+      "command": "node",
+      "args": ["./mcp-server/index.js"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "MCP_API_KEY": ""
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${workspaceFolder}"]
+    }
+  }
+}
