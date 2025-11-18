@@ -14,58 +14,35 @@ pub struct AppState {
 }
 
 #[tauri::command]
-pub fn start_timer(app: tauri::AppHandle, state: State<AppState>) -> Result<Session, String> {
-    let session = state
+pub fn start_timer(state: State<AppState>) -> Result<Session, String> {
+    state
         .timer_manager
         .start_session()
-        .map_err(|e| e.to_string())?;
-    
-    // Update tray menu immediately
-    let elapsed = state.timer_manager.get_current_elapsed_seconds();
-    let _ = crate::system_tray::update_tray_menu(&app, true, false, elapsed);
-    
-    Ok(session)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub fn pause_timer(app: tauri::AppHandle, state: State<AppState>) -> Result<Session, String> {
-    let session = state
+pub fn pause_timer(state: State<AppState>) -> Result<Session, String> {
+    state
         .timer_manager
         .pause_session()
-        .map_err(|e| e.to_string())?;
-    
-    // Update tray menu immediately
-    let elapsed = state.timer_manager.get_current_elapsed_seconds();
-    let _ = crate::system_tray::update_tray_menu(&app, true, true, elapsed);
-    
-    Ok(session)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub fn resume_timer(app: tauri::AppHandle, state: State<AppState>) -> Result<Session, String> {
-    let session = state
+pub fn resume_timer(state: State<AppState>) -> Result<Session, String> {
+    state
         .timer_manager
         .resume_session()
-        .map_err(|e| e.to_string())?;
-    
-    // Update tray menu immediately
-    let elapsed = state.timer_manager.get_current_elapsed_seconds();
-    let _ = crate::system_tray::update_tray_menu(&app, true, false, elapsed);
-    
-    Ok(session)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub fn end_timer(app: tauri::AppHandle, state: State<AppState>) -> Result<Session, String> {
-    let session = state
+pub fn end_timer(state: State<AppState>) -> Result<Session, String> {
+    state
         .timer_manager
         .end_session()
-        .map_err(|e| e.to_string())?;
-    
-    // Update tray menu immediately to idle state
-    let _ = crate::system_tray::update_tray_menu(&app, false, false, 0);
-    
-    Ok(session)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]

@@ -78,12 +78,6 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     try {
       await invoke('start_timer');
       await get().refreshTimerState();
-      const state = get().timerState;
-      await invoke('update_tray', { 
-        isRunning: state.is_running, 
-        isPaused: state.is_paused,
-        elapsedSeconds: state.elapsed_seconds 
-      });
     } catch (error) {
       console.error('Failed to start timer:', error);
       throw error;
@@ -94,12 +88,6 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     try {
       await invoke('pause_timer');
       await get().refreshTimerState();
-      const state = get().timerState;
-      await invoke('update_tray', { 
-        isRunning: state.is_running, 
-        isPaused: state.is_paused,
-        elapsedSeconds: state.elapsed_seconds 
-      });
     } catch (error) {
       console.error('Failed to pause timer:', error);
       throw error;
@@ -110,12 +98,6 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
     try {
       await invoke('resume_timer');
       await get().refreshTimerState();
-      const state = get().timerState;
-      await invoke('update_tray', { 
-        isRunning: state.is_running, 
-        isPaused: state.is_paused,
-        elapsedSeconds: state.elapsed_seconds 
-      });
     } catch (error) {
       console.error('Failed to resume timer:', error);
       throw error;
@@ -127,12 +109,6 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
       const session = await invoke<Session>('end_timer');
       await get().refreshTimerState();
       await get().fetchAllSessions();
-      const state = get().timerState;
-      await invoke('update_tray', { 
-        isRunning: state.is_running, 
-        isPaused: state.is_paused,
-        elapsedSeconds: state.elapsed_seconds 
-      });
       
       // Auto-export session
       try {
