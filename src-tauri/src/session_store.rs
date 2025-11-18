@@ -159,11 +159,16 @@ impl SessionStore {
     }
 
     pub fn get_monthly_summary(&self, year: i32, month: u32) -> Result<MonthlySummary> {
+        use chrono::Datelike;
+        use crate::models::WeeklySummary;
+        
         let sessions = self.get_sessions_for_month(year, month)?;
 
         let mut total_seconds = 0i64;
         let mut longest_session_seconds = 0i64;
         let mut daily_map: std::collections::HashMap<String, (i64, usize)> =
+            std::collections::HashMap::new();
+        let mut weekly_map: std::collections::HashMap<String, (i64, usize)> =
             std::collections::HashMap::new();
 
         for session in &sessions {
@@ -174,6 +179,13 @@ impl SessionStore {
             let entry = daily_map.entry(date_key).or_insert((0, 0));
             entry.0 += session.total_seconds;
             entry.1 += 1;
+
+            // Calculate week key (ISO week format)
+            let iso_week = session.start.iso_week();
+            let week_key = format!("{}-W{:02}", iso_week.year(), iso_week.week());
+            let week_entry = weekly_map.entry(week_key).or_insert((0, 0));
+            week_entry.0 += session.total_seconds;
+            week_entry.1 += 1;
         }
 
         let mut daily_breakdown: Vec<DailySummary> = daily_map
@@ -187,13 +199,47 @@ impl SessionStore {
 
         daily_breakdown.sort_by(|a, b| a.date.cmp(&b.date));
 
+        // Calculate weekly breakdown with overtime (40 hours = 144000 seconds)
+        let mut weekly_breakdown: Vec<WeeklySummary> = weekly_map
+            .into_iter()
+            .map(|(week_key, (seconds, count))| {
+                let total_hours = seconds as f64 / 3600.0;
+                let regular_hours = total_hours.min(40.0);
+                let overtime_hours = (total_hours - 40.0).max(0.0);
+                
+                // Parse week to get start and end dates
+                let parts: Vec<&str> = week_key.split("-W").collect();
+                let year = parts[0].parse::<i32>().unwrap_or(year);
+                let week = parts.get(1).and_then(|w| w.parse::<u32>().ok()).unwrap_or(1);
+                
+                WeeklySummary {
+                    week_start: format!("{} Week {}", year, week),
+                    week_end: format!("{} Week {}", year, week),
+                    regular_hours,
+                    overtime_hours,
+                    total_hours,
+                    session_count: count,
+                }
+            })
+            .collect();
+
+        weekly_breakdown.sort_by(|a, b| a.week_start.cmp(&b.week_start));
+
+        // Calculate total regular and overtime hours for the month
+        let total_hours = total_seconds as f64 / 3600.0;
+        let total_overtime_hours: f64 = weekly_breakdown.iter().map(|w| w.overtime_hours).sum();
+        let total_regular_hours = total_hours - total_overtime_hours;
+
         Ok(MonthlySummary {
             year,
             month,
             total_seconds,
+            regular_hours: total_regular_hours,
+            overtime_hours: total_overtime_hours,
             session_count: sessions.len(),
             longest_session_seconds,
             daily_breakdown,
+            weekly_breakdown,
         })
     }
 

@@ -17,13 +17,25 @@ export interface TimerState {
   elapsed_seconds: number;
 }
 
+export interface WeeklySummary {
+  week_start: string;
+  week_end: string;
+  regular_hours: number;
+  overtime_hours: number;
+  total_hours: number;
+  session_count: number;
+}
+
 export interface MonthlySummary {
   year: number;
   month: number;
   total_seconds: number;
+  regular_hours: number;
+  overtime_hours: number;
   session_count: number;
   longest_session_seconds: number;
   daily_breakdown: DailySummary[];
+  weekly_breakdown: WeeklySummary[];
 }
 
 export interface DailySummary {

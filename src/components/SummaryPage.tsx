@@ -103,24 +103,57 @@ export function SummaryPage() {
               </Card>
             </Grid.Col>
             
-            <Grid.Col span={6}>
+            <Grid.Col span={4}>
+              <Card shadow="sm" padding="md" radius="md" withBorder>
+                <Text size="xs" c="dimmed" mb="xs">Regular Hours</Text>
+                <Text size="xl" fw={700} c="blue">{monthlySummary.regular_hours.toFixed(1)}h</Text>
+              </Card>
+            </Grid.Col>
+            
+            <Grid.Col span={4}>
+              <Card shadow="sm" padding="md" radius="md" withBorder>
+                <Text size="xs" c="dimmed" mb="xs">Overtime Hours</Text>
+                <Text size="xl" fw={700} c="orange">{monthlySummary.overtime_hours.toFixed(1)}h</Text>
+              </Card>
+            </Grid.Col>
+            
+            <Grid.Col span={4}>
               <Card shadow="sm" padding="md" radius="md" withBorder>
                 <Text size="xs" c="dimmed" mb="xs">Longest Session</Text>
                 <Text size="xl" fw={700}>{formatDuration(monthlySummary.longest_session_seconds)}</Text>
               </Card>
             </Grid.Col>
-            
-            <Grid.Col span={6}>
-              <Card shadow="sm" padding="md" radius="md" withBorder>
-                <Text size="xs" c="dimmed" mb="xs">Avg Per Day</Text>
-                <Text size="xl" fw={700}>
-                  {monthlySummary.daily_breakdown.length > 0
-                    ? formatDuration(Math.floor(monthlySummary.total_seconds / monthlySummary.daily_breakdown.length))
-                    : '0h 0m'}
-                </Text>
-              </Card>
-            </Grid.Col>
           </Grid>
+
+          {monthlySummary.weekly_breakdown && monthlySummary.weekly_breakdown.length > 0 && (
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <Text size="lg" fw={600} mb="md">Weekly Breakdown (40h = Regular, &gt;40h = Overtime)</Text>
+              <Table striped highlightOnHover>
+                <Table.Thead>
+                  <Table.Tr>
+                    <Table.Th>Week</Table.Th>
+                    <Table.Th>Sessions</Table.Th>
+                    <Table.Th>Total Hours</Table.Th>
+                    <Table.Th>Regular Hours</Table.Th>
+                    <Table.Th>Overtime Hours</Table.Th>
+                  </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                  {monthlySummary.weekly_breakdown.map((week, idx) => (
+                    <Table.Tr key={idx}>
+                      <Table.Td>{week.week_start}</Table.Td>
+                      <Table.Td>{week.session_count}</Table.Td>
+                      <Table.Td fw={600}>{week.total_hours.toFixed(1)}h</Table.Td>
+                      <Table.Td c="blue">{week.regular_hours.toFixed(1)}h</Table.Td>
+                      <Table.Td c={week.overtime_hours > 0 ? 'orange' : 'gray'} fw={week.overtime_hours > 0 ? 700 : 400}>
+                        {week.overtime_hours.toFixed(1)}h
+                      </Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            </Card>
+          )}
 
           {monthlySummary.daily_breakdown.length > 0 ? (
             <Card shadow="sm" padding="lg" radius="md" withBorder>

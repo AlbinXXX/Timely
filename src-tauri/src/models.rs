@@ -52,15 +52,29 @@ impl Session {
     }
 }
 
+/// Weekly summary with overtime tracking
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WeeklySummary {
+    pub week_start: String,
+    pub week_end: String,
+    pub regular_hours: f64,
+    pub overtime_hours: f64,
+    pub total_hours: f64,
+    pub session_count: usize,
+}
+
 /// Session summary for a specific month
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MonthlySummary {
     pub year: i32,
     pub month: u32,
     pub total_seconds: i64,
+    pub regular_hours: f64,
+    pub overtime_hours: f64,
     pub session_count: usize,
     pub longest_session_seconds: i64,
     pub daily_breakdown: Vec<DailySummary>,
+    pub weekly_breakdown: Vec<WeeklySummary>,
 }
 
 /// Daily summary within a month

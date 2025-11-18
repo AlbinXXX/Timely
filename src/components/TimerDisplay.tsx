@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Card, Text, Badge, Group, Stack } from '@mantine/core';
+import { invoke } from '@tauri-apps/api/core';
 import { useTimerStore } from '../stores/timerStore';
 
 export function TimerDisplay() {
@@ -13,6 +14,23 @@ export function TimerDisplay() {
 
     return () => clearInterval(interval);
   }, [refreshTimerState]);
+
+  // Update tray menu every 10 seconds with current elapsed time
+  useEffect(() => {
+    if (timerState.is_running) {
+      const updateTray = async () => {
+        await invoke('update_tray', {
+          isRunning: timerState.is_running,
+          isPaused: timerState.is_paused,
+          elapsedSeconds: timerState.elapsed_seconds
+        });
+      };
+      
+      updateTray();
+      const interval = setInterval(updateTray, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [timerState.is_running, timerState.is_paused, timerState.elapsed_seconds]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
