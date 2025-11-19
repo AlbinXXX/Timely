@@ -56,6 +56,7 @@ interface TimerStore {
   resumeTimer: () => Promise<void>;
   endTimer: () => Promise<void>;
   refreshTimerState: () => Promise<void>;
+  updateTray: () => Promise<void>;
   fetchAllSessions: () => Promise<void>;
   fetchMonthlySummary: (year: number, month: number) => Promise<void>;
   exportSession: (session: Session) => Promise<string>;
@@ -76,8 +77,20 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
 
   startTimer: async () => {
     try {
-      await invoke('start_timer');
-      await get().refreshTimerState();
+      console.log('Starting timer...');
+      const result = await invoke('start_timer');
+      console.log('Timer started:', result);
+      
+      // Refresh state and get it directly
+      const state = await invoke<TimerState>('get_timer_state');
+      set({ timerState: state });
+      
+      // Update tray with the fresh state
+      await invoke('update_tray', {
+        isRunning: state.is_running,
+        isPaused: state.is_paused,
+        elapsedSeconds: state.elapsed_seconds,
+      });
     } catch (error) {
       console.error('Failed to start timer:', error);
       throw error;
@@ -87,7 +100,17 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   pauseTimer: async () => {
     try {
       await invoke('pause_timer');
-      await get().refreshTimerState();
+      
+      // Refresh state and get it directly
+      const state = await invoke<TimerState>('get_timer_state');
+      set({ timerState: state });
+      
+      // Update tray with the fresh state
+      await invoke('update_tray', {
+        isRunning: state.is_running,
+        isPaused: state.is_paused,
+        elapsedSeconds: state.elapsed_seconds,
+      });
     } catch (error) {
       console.error('Failed to pause timer:', error);
       throw error;
@@ -97,7 +120,17 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   resumeTimer: async () => {
     try {
       await invoke('resume_timer');
-      await get().refreshTimerState();
+      
+      // Refresh state and get it directly
+      const state = await invoke<TimerState>('get_timer_state');
+      set({ timerState: state });
+      
+      // Update tray with the fresh state
+      await invoke('update_tray', {
+        isRunning: state.is_running,
+        isPaused: state.is_paused,
+        elapsedSeconds: state.elapsed_seconds,
+      });
     } catch (error) {
       console.error('Failed to resume timer:', error);
       throw error;
@@ -107,7 +140,18 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
   endTimer: async () => {
     try {
       const session = await invoke<Session>('end_timer');
-      await get().refreshTimerState();
+      
+      // Refresh state and get it directly
+      const state = await invoke<TimerState>('get_timer_state');
+      set({ timerState: state });
+      
+      // Update tray with the fresh state
+      await invoke('update_tray', {
+        isRunning: state.is_running,
+        isPaused: state.is_paused,
+        elapsedSeconds: state.elapsed_seconds,
+      });
+      
       await get().fetchAllSessions();
       
       // Auto-export session
@@ -125,10 +169,28 @@ export const useTimerStore = create<TimerStore>((set, get) => ({
 
   refreshTimerState: async () => {
     try {
+      console.log('Refreshing timer state...');
       const state = await invoke<TimerState>('get_timer_state');
+      console.log('Timer state received:', JSON.stringify(state, null, 2));
       set({ timerState: state });
+      console.log('Store updated with:', get().timerState);
     } catch (error) {
       console.error('Failed to refresh timer state:', error);
+    }
+  },
+
+  updateTray: async () => {
+    try {
+      const state = get().timerState;
+      console.log('Updating tray with state:', state);
+      await invoke('update_tray', {
+        isRunning: state.is_running,
+        isPaused: state.is_paused,
+        elapsedSeconds: state.elapsed_seconds,
+      });
+      console.log('Tray updated successfully');
+    } catch (error) {
+      console.error('Failed to update tray:', error);
     }
   },
 

@@ -1,10 +1,9 @@
 import { useEffect } from 'react';
-import { Card, Text, Badge, Group, Stack } from '@mantine/core';
-import { invoke } from '@tauri-apps/api/core';
+import { Card, Text, Badge, Stack } from '@mantine/core';
 import { useTimerStore } from '../stores/timerStore';
 
 export function TimerDisplay() {
-  const { timerState, currentTime, refreshTimerState } = useTimerStore();
+  const { timerState, refreshTimerState } = useTimerStore();
 
   useEffect(() => {
     refreshTimerState();

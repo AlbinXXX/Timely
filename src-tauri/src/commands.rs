@@ -48,13 +48,17 @@ pub fn end_timer(state: State<AppState>) -> Result<Session, String> {
 #[tauri::command]
 pub fn get_timer_state(state: State<AppState>) -> TimerState {
     if let Some(session) = state.timer_manager.get_current_session() {
+        let elapsed = state.timer_manager.get_current_elapsed_seconds();
+        println!("Timer state - Session ID: {}, Paused: {}, Elapsed: {}", 
+                 session.id, session.is_paused(), elapsed);
         TimerState {
             is_running: true,
             is_paused: session.is_paused(),
-            current_session_id: Some(session.id),
-            elapsed_seconds: state.timer_manager.get_current_elapsed_seconds(),
+            current_session_id: Some(session.id.clone()),
+            elapsed_seconds: elapsed,
         }
     } else {
+        println!("No active session");
         TimerState::default()
     }
 }

@@ -13,19 +13,25 @@ function App() {
   const { startTimer, pauseTimer, resumeTimer, endTimer } = useTimerStore();
 
   useEffect(() => {
+    console.log('Setting up tray event listeners...');
+    
     const unlistenStart = listen('tray-start-timer', () => {
+      console.log('Received tray-start-timer event');
       startTimer();
     });
 
     const unlistenPause = listen('tray-pause-timer', () => {
+      console.log('Received tray-pause-timer event');
       pauseTimer();
     });
 
     const unlistenResume = listen('tray-resume-timer', () => {
+      console.log('Received tray-resume-timer event');
       resumeTimer();
     });
 
     const unlistenEnd = listen('tray-end-timer', () => {
+      console.log('Received tray-end-timer event');
       endTimer();
     });
 
